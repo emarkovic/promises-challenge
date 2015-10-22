@@ -31,6 +31,37 @@ $(document).ready(function() {
 
   // Creates a promise that will take delay ms before resolving with the given value
   // Don't worry about how this works, but if you want you're curious feel free to ask!
+
+  $('#fetch-weather').click(function () {
+    //get user location
+    //after location is gotten, get the weather
+    // getLoc() 
+      // .then(function (result) {
+      //   console.log([result.lat, result.lon]);        
+      //   return [result.lat, result.lon];
+      // })
+      // .then(getWeather)
+      // .then(function (result) {
+      //   console.log(result);
+      // })
+    getLoc()
+      .then(getWeather)
+      .then(function (result) {
+        console.log(result);
+        $('#weather-results').text(JSON.stringify(result));
+      })
+  })
+
+  function getLoc() {
+    var url = 'http://www.ip-api.com/json/';
+    return $.get(url);
+  }
+
+  function getWeather(res) {    
+    var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + res.city + '&appid=bd82977b86bf27fb59a04b61b657fb6f';
+    return $.getJSON(url);
+  }
+
   function promiseFactory(delay, val) {
     function f() {
       var d = $.Deferred();
