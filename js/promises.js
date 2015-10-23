@@ -17,7 +17,8 @@ $(document).ready(function() {
   - Below I've implemented a couple of promises that just use timeouts, and return numbers
   - When the user clicks the serial button: each of the promises will execute one by one,
     and you will return the result in #slow-result
-  - When the user clicks the parallel button: each of the promises will execute at the same time, and you will return the result in #fast-result
+  - When the user clicks the parallel button: each of the promises will execute at the same time,
+     and you will return the result in #fast-result
   - This is to show the immense importance of network optimization!
   
   Part 3: Modify the promise factory to create promises that can FAIL
@@ -74,30 +75,22 @@ $(document).ready(function() {
   }
 
   var quick = promiseFactory(500, 5);
-  // quick(); executes the promise
   var medium = promiseFactory(1000, 2);
   var slow = promiseFactory(2000, 30)
 
-  // $.when(...) {}
   $('#serial-promise').click(function () {
     var sum = 0
-    quick()
-      .then(function (data) {
-        sum += data;
-      })
-      .then(medium)
-      .then(function (data) {
-        sum += data;
-      })
-      .then(slow)
-      .then(function (data) {
-        sum += data;
+    var promFns = [slow, medium, quick];
+    promFns.reduce(function (sequence, promiseFn) {
+      return sequence
+        .then(promiseFn)
+        .then(function (data) {
+          sum += data;
+        });
+    }, $.Deferred().resolve())
+      .then(function () {
         $('#result-slow').text(sum);
-        console.log("slow done");
       })
-      .fail(function () {
-        $('#result-slow').text("Failed");
-      });
   });
 
   $('#parallel-promise').click(function () {
