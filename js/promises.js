@@ -15,7 +15,8 @@ $(document).ready(function() {
   Part 2: Show the difference between parallel and serial promises
 
   - Below I've implemented a couple of promises that just use timeouts, and return numbers
-  - When the user clicks the serial button: each of the promises will execute one by one, and you will return the result in #slow-result
+  - When the user clicks the serial button: each of the promises will execute one by one,
+    and you will return the result in #slow-result
   - When the user clicks the parallel button: each of the promises will execute at the same time, and you will return the result in #fast-result
   - This is to show the immense importance of network optimization!
   
@@ -33,22 +34,17 @@ $(document).ready(function() {
   // Don't worry about how this works, but if you want you're curious feel free to ask!
 
   $('#fetch-weather').click(function () {
-    //get user location
-    //after location is gotten, get the weather
-    // getLoc() 
-      // .then(function (result) {
-      //   console.log([result.lat, result.lon]);        
-      //   return [result.lat, result.lon];
-      // })
-      // .then(getWeather)
-      // .then(function (result) {
-      //   console.log(result);
-      // })
     getLoc()
       .then(getWeather)
       .then(function (result) {
-        console.log(result);
-        $('#weather-results').text(JSON.stringify(result));
+        var desc = result.weather[0].description;
+        var temp = result.main.temp + " Kelvin";
+        $('#weather-results')
+          .html("<h3>Today's weather</h1><p>Description : " + 
+            desc + 
+            "</p><p>Temperature : " +
+            temp + 
+            "</p>");
       })
   })
 
@@ -68,9 +64,10 @@ $(document).ready(function() {
 
       setTimeout(function() {
         d.resolve(val);
+        // d.reject(val);
       }, delay);
 
-      return d.promise();
+      return d.promise();      
     }
 
     return f;
@@ -82,5 +79,41 @@ $(document).ready(function() {
   var slow = promiseFactory(2000, 30)
 
   // $.when(...) {}
+  $('#serial-promise').click(function () {
+    var sum = 0
+    quick()
+      .then(function (data) {
+        sum += data;
+      })
+      .then(medium)
+      .then(function (data) {
+        sum += data;
+      })
+      .then(slow)
+      .then(function (data) {
+        sum += data;
+        $('#result-slow').text(sum);
+        console.log("slow done");
+      })
+      .fail(function () {
+        $('#result-slow').text("Failed");
+      });
+  });
 
+  $('#parallel-promise').click(function () {
+      var proms = $.when(quick(), medium(), slow());
+      proms
+        .done(function (data1, data2, data3) {
+          $('#result-fast').text(data1 + data2 + data3);
+          console.log("fast done");
+        })
+        .fail(function () {
+          $('#result-fast').text("Failed");
+        })
+  });
+
+  $('#reset').click(function () {
+    $('#result-slow').text("");
+    $('#result-fast').text("");
+  });
 });
